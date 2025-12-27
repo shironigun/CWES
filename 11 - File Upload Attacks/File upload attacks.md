@@ -395,3 +395,27 @@ In addition to all of the attacks we have discussed in this module, there are mo
 - **Content-Disposition**: Used to specify how the content should be displayed in the browser. Setting it to `attachment` instructs the browser to download the file rather than render it inline.
 - **Content-Type**: Specifies the MIME type of the file, ensuring that the browser knows how to handle the file content appropriately.
 - **X-Content-Type-Options: nosniff**: Prevents the browser from MIME-type sniffing, which helps mitigate security risks by ensuring that the browser adheres strictly to the specified `Content-Type`.
+
+### Random File Names
+
+- Store the files in storage with random names to avoid directory detection.
+- Store the original names in database with sanitization to prevent OS command injections.
+
+### Standalone server & server configuration
+
+- Use a separate server to store & serve the files so that only upload server is compromised & not the whole backend.
+- Configure web server to not allow read/write access to any directory other then the one where uploaded files are kept.
+
+### Code listing
+
+- Add the server language functions to web server blacklist which can cause shell execution.
+- Always show general errors rather showing errors thrown by server hosted system
+
+### Others
+
+- Limit file size
+- Update any used libraries
+- Scan uploaded files for malware or malicious strings
+- Utilize a Web Application Firewall (WAF) as a secondary layer of protection
+
+**NOTE**: we can use these as a checklist when doing pentesting for file upload features & can provide development team as well to fill the gaps in initial stages.

